@@ -66,7 +66,7 @@ export class MainComponent implements OnInit {
 
     //physics stuff
     this.world = new CANNON.World();
-    this.world.gravity.set(0, 100, 0);; //pulls things down on axis Y
+    this.world.gravity.set(0, -10, 0);; //pulls things down on axis Y
     this.world.broadphase = new CANNON.NaiveBroadphase();
     this.world.solver.iterations = 40;
 
