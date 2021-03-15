@@ -1,10 +1,12 @@
 <div *ngIf="gameOver" class="gameover">
-    <h1>You Died!</h1>
-    <h4>Score: {{stack.length-1}}</h4>
-    <h4>Current High Score: {{highScore}}</h4>
-    <br>
-    <div (click)="restart($event)" style="cursor: pointer;">
-        <h3>Click here to play again</h3>
+    <div class="gameover__text">
+        <h1>You Died!</h1>
+        <h4>Score: {{stack.length-1}}</h4>
+        <h4>Current High Score: {{highScore}}</h4>
+        <br>
+        <div (click)="restart($event)" style="cursor: pointer;">
+            <h3>Click here to play again</h3>
+        </div>
     </div>
 </div>
 <div *ngIf="!gameOver" class="score">

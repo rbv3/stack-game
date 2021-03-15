@@ -18,6 +18,7 @@ export class MainComponent implements OnInit {
   gameStarted = false;
   gameOver = false;
   highScore: string;
+  onGoing: boolean;
 
   constructor() { }
 
@@ -29,6 +30,8 @@ export class MainComponent implements OnInit {
     this.overhangs = [];
     this.gameStarted = true;
     this.gameOver = false;
+    this.onGoing = true;
+    this.renderer.setAnimationLoop(() => this.animation());
 
     if (this.world) {
       // Remove every object from world
@@ -115,7 +118,6 @@ export class MainComponent implements OnInit {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
-    console.log(this.camera)
 
     // Add it to HTML
     document.body.appendChild(this.renderer.domElement);
@@ -132,7 +134,6 @@ export class MainComponent implements OnInit {
     }
     const material = new THREE.MeshLambertMaterial({ color: color });
     const mesh = new THREE.Mesh(geometry, material);
-    console.log("at create box: ", y);
     mesh.position.set(x, y, z);
     this.scene.add(mesh);
 
@@ -154,18 +155,15 @@ export class MainComponent implements OnInit {
   }
   addLayer(x, z, width, depth, direction?) {
     const y = this.boxHeight * this.stack.length;
-    console.log("at addlayer box: ", y);
     const layer = this.createBox(x, y, z, width, depth, false);
     layer.direction = direction;
 
     this.stack.push(layer);
-    console.log(this.stack[this.stack.length - 1].threejs.position)
   }
   addOverhang(x, z, width, depth) {
     const y = this.boxHeight * ((this.stack.length - 1));
     const overhang = this.createBox(x, y, z, width, depth, true, true);
     this.overhangs.push(overhang);
-    console.log(this.overhangs)
   }
   updatePhysics() {
     this.world.step(1 / 60);
@@ -175,11 +173,26 @@ export class MainComponent implements OnInit {
       el.threejs.quaternion.copy(el.cannonjs.quaternion);
     })
   }
+  endGame() {
+    this.gameOver = true;
+    this.gameStarted = false;
+    this.onGoing = false;
+    this.renderer.setAnimationLoop();
+    this.highScore = Math.max(this.stack.length - 1, parseInt(localStorage.getItem('high-score'))).toString();
+    localStorage.setItem('high-score', this.highScore.toString());
+  }
   animation() {
     const speed = 0.15;
     const topLayer = this.stack[this.stack.length - 1];
+    const previousLayer = this.stack[this.stack.length - 2];
+    const previousSize = (topLayer.direction == "x") ? previousLayer.threejs.geometry.parameters.width : previousLayer.threejs.geometry.parameters.depth;
+    const maxPos = previousLayer.threejs.position[topLayer.direction] + previousSize;
+    console.log(speed)
     topLayer.threejs.position[topLayer.direction] += speed;
     topLayer.cannonjs.position[topLayer.direction] += speed;
+    if (topLayer.threejs.position[topLayer.direction] > (maxPos + 1)) {
+      this.endGame();
+    };
     //4 is the initial camera height
     if (this.camera.position.y < this.boxHeight * (this.stack.length - 2) + 4) {
       this.camera.position.y += speed;
@@ -189,16 +202,18 @@ export class MainComponent implements OnInit {
   }
   ngOnInit(): void {
     this.gameOver = false;
+    this.onGoing = true;
     window.addEventListener("click", () => {
-      if (!this.gameStarted) {
+      if(!this.onGoing) {
+        return;
+      }
+      else if (!this.gameStarted) {
         this.renderer.setAnimationLoop(() => this.animation());
         this.gameStarted = (this.gameOver) ? false : true;
       }
       else {
         const topLayer = this.stack[this.stack.length - 1];
         const previousLayer = this.stack[this.stack.length - 2];
-        console.log(topLayer);
-        console.log(previousLayer);
         const direction = topLayer.direction;
 
         const delta = topLayer.threejs.position[direction] - previousLayer.threejs.position[direction];
@@ -240,30 +255,16 @@ export class MainComponent implements OnInit {
 
         }
         else {
-          console.log("You Died");
-          this.gameOver = true;
-          this.gameStarted = false;
-          this.highScore = Math.max(this.stack.length - 1, parseInt(localStorage.getItem('high-score'))).toString();
-          localStorage.setItem('high-score', this.highScore.toString());
-          console.log(this.highScore);
+          this.endGame();
         }
 
       }
     })
-
-    window.addEventListener("keydown", (event) => {
-      if (event.key == "Enter") {
-        event.preventDefault();
-        this.startGame();
-        return;
-      }
-    });
     this.setup();
   }
   restart(e: Event) {
     e.stopPropagation();
     e.preventDefault();
-    console.log("pinto")
     this.startGame();
   }
 
