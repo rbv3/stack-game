@@ -71,7 +71,7 @@ export class MainComponent implements OnInit {
     this.world.solver.iterations = 40;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x000000);
+    this.scene.background = new THREE.Color(0x9eafb8);
 
     this.addLayer(0, 0, this.boxSize, this.boxSize);
     this.addLayer(-10, 0, this.boxSize, this.boxSize, "x");
@@ -259,6 +259,12 @@ export class MainComponent implements OnInit {
       }
     });
     this.setup();
+  }
+  restart(e: Event) {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log("pinto")
+    this.startGame();
   }
 
 }
