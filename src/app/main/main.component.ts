@@ -69,7 +69,7 @@ export class MainComponent implements OnInit {
 
     //physics stuff
     this.world = new CANNON.World();
-    this.world.gravity.set(0, -10, 0);; //pulls things down on axis Y
+    this.world.gravity.set(0, -50, 0);; //pulls things down on axis Y
     this.world.broadphase = new CANNON.NaiveBroadphase();
     this.world.solver.iterations = 40;
 
@@ -144,6 +144,12 @@ export class MainComponent implements OnInit {
     let mass = falls ? 5 : 0;
     const body = new CANNON.Body({ mass, shape });
     body.position.set(x, y, z);
+    if(this.stack.length > 0 && this.stack[this.stack.length -1].direction == "x") {
+      body.velocity.set(0, -10, 2);
+    }
+    else if(this.stack.length > 0) {
+      body.velocity.set(2, -10, 0);
+    }
     this.world.addBody(body);
 
     return {
