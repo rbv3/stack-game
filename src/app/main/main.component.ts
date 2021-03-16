@@ -145,11 +145,12 @@ export class MainComponent implements OnInit {
     const body = new CANNON.Body({ mass, shape });
     body.position.set(x, y, z);
     if(this.stack.length > 0 && this.stack[this.stack.length -1].direction == "x") {
-      body.velocity.set(0, -10, 2);
+      body.velocity.set(0, -5, 2);
     }
     else if(this.stack.length > 0) {
-      body.velocity.set(2, -10, 0);
+      body.velocity.set(2, -5, 0);
     }
+    console.log(body)
     this.world.addBody(body);
 
     return {
